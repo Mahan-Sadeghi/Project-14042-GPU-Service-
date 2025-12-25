@@ -25,9 +25,9 @@ class User(Base):
         return f"<User(username='{self.username}', role='{self.role}')>"
 
 class Job(Base):
-    """
-    مدل درخواست (Job Model) - منطبق با بند 10 و 12 فایل پروژه
-    """
+   
+    """مدل درخواست (Job Model)"""
+    
     __tablename__ = 'jobs'
 
     id = Column(Integer, primary_key=True)
@@ -38,7 +38,7 @@ class Job(Base):
     gpu_count = Column(Integer, default=1)
     estimated_hours = Column(Integer, nullable=False)
     
-    # فیلد جدید اضافه شده طبق بند 10
+    # دستور اجرای مدل
     command = Column(Text, nullable=True)
     
     is_sensitive = Column(Boolean, default=False)
