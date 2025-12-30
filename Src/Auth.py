@@ -1,59 +1,31 @@
-import jwt
-import datetime
+from datetime import datetime, timedelta
+from jose import jwt
 from passlib.context import CryptContext
 
-# --- تنظیمات امنیتی ---
-# در پروژه واقعی این کلید باید مخفی باشد
-SECRET_KEY = "my_super_secret_key_for_project_14042"
+# تنظیمات ساده (برای پروژه دانشگاهی همین‌طور ساده عالیه)
+SECRET_KEY = "my_secret_key" # یک رمز دلخواه
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30  # اعتبار توکن: ۳۰ دقیقه
 
-# تنظیمات هش کردن پسورد (سعی می‌کند از bcrypt استفاده کند)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# ابزار رمزنگاری پسورد
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
+# 1. تابع چک کردن پسورد (آیا پسورد وارد شده با دیتابیس یکی هست؟)
 def verify_password(plain_password, hashed_password):
-    """
-    بررسی میکند آیا پسورد وارد شده با پسورد هش شده در دیتابیس یکی است؟
-    """
     return pwd_context.verify(plain_password, hashed_password)
 
+# 2. تابع رمزنگاری پسورد (برای موقع ثبت‌نام)
 def get_password_hash(password):
-    """
-    تبدیل پسورد معمولی به هش (رمزنگاری شده)
-    """
     return pwd_context.hash(password)
 
+# 3. تابع ساخت توکن (کارت ورود)
 def create_access_token(data: dict):
-    """
-    ساخت توکن JWT برای کاربر لاگین شده.
-    """
     to_encode = data.copy()
-    expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    # توکن بعد از 30 دقیقه منقضی میشه
+    expire = datetime.utcnow() + timedelta(minutes=30)
+    to_encode.update({"exp": expire})
     
+    # ساخت کد نهایی
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
-# بخش تست خودکار (لحظه حقیقت) 
-
-if __name__ == "__main__":
-    print("Testing Security Libraries")
-    
-    # تست ۱: آیا پسورد هش میشود؟
-    try:
-        my_pass = "student123"
-        hashed = get_password_hash(my_pass)
-        print(f"✅ Hashing Check: PASSED")
-        print(f"   Original: {my_pass}")
-        print(f"   Hashed:   {hashed}")
-    except Exception as e:
-        print(f"❌ Hashing FAILED: {e}")
-
-    # تست ۲: آیا توکن ساخته میشود؟
-    try:
-        token = create_access_token({"sub": "ali_user", "role": "admin"})
-        print(f"✅ Token Check: PASSED")
-        print(f"   Generated Token: {token}")
-    except Exception as e:
-        print(f"❌ Token FAILED: {e}")
         
         
